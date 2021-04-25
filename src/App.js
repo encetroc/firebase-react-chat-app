@@ -4,7 +4,7 @@ import { StoreProvider } from './Store'
 import { Dashboard } from './components'
 import { PrivateRoute, LoginRoute } from './routes'
 import { FullScreen } from './styled-components'
-import { Chatrooms } from "./pages"
+import { Chatrooms, Chatroom } from "./pages"
 
 function App() {
     return (
@@ -13,9 +13,10 @@ function App() {
                 <StoreProvider>
                     <FullScreen>
                         <Switch>
-                            <PrivateRoute exact path="/" component={Dashboard} />
-                            <PrivateRoute exact path="/chatrooms" component={Chatrooms} />
+                            <PrivateRoute path="/chatrooms" component={Chatrooms} />
+                            <PrivateRoute path="/chatroom/:id" component={Chatroom} />
                             <LoginRoute path="/login" />
+                            <PrivateRoute exact path="/" component={Dashboard} />
                         </Switch>
                     </FullScreen>
                 </StoreProvider>

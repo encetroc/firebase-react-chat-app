@@ -12,6 +12,7 @@ import Input from './Input'
 import FloatingButton from './FloatingButton'
 import CircleButton from './CircleButton'
 import SubTitle from './SubTitle'
+import Message from './Message'
 
 export {
     FullScreen,
@@ -27,5 +28,6 @@ export {
     Input,
     FloatingButton,
     CircleButton,
-    SubTitle
+    SubTitle,
+    Message
 }

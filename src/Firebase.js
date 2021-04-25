@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react'
 import { initializeApp, getApps } from "firebase/app"
 import { getAuth, signOut, signInWithPopup, GoogleAuthProvider, getAdditionalUserInfo } from "firebase/auth"
-import { setDoc, getDoc, doc, collection, getDocs, getFirestore, query, where, limit, updateDoc, arrayUnion, orderBy, onSnapshot } from "firebase/firestore"
+import { setDoc, getDoc, doc, collection, getDocs, getFirestore, query, where, limit, updateDoc, arrayUnion, orderBy, onSnapshot, serverTimestamp } from "firebase/firestore"
 
 if (getApps().length === 0) {
     const firebaseApp = initializeApp({
@@ -77,12 +77,17 @@ const FirebaseProvider = ({ children }) => {
         }
     }
 
-    const getRealtimeMessages = (docId, dispatch) => {
+    const getRealtimeMessages = (docId, dispatch, user) => {
         const q = query(collection(firestore, 'chatrooms', docId, 'messages'), orderBy("createdAt", "desc"))
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             const messages = []
             querySnapshot.forEach((doc) => {
-                messages.push(doc.data());
+                messages.push({
+                    ...doc.data(),
+                    isOwned: user.uid === doc.data().uid ? true : false,
+                    id: doc.id,
+                })
+                //messages.push(doc.data());
             });
             dispatch({
                 type: 'SET_MESSAGES',
@@ -111,6 +116,16 @@ const FirebaseProvider = ({ children }) => {
         return chatrooms
     }
 
+    const addMessage = async (messageContent, userUid, chatroomId) => {
+        const messageRef = doc(collection(firestore, 'chatrooms', chatroomId, 'messages'));
+        await setDoc(messageRef, {
+            type: 'text',
+            createdAt: serverTimestamp(),
+            content: messageContent,
+            uid: userUid
+        });
+    }
+
     const value = {
         signInWithGoogle,
         getChatrooms,
@@ -118,6 +133,7 @@ const FirebaseProvider = ({ children }) => {
         getRealtimeMessages,
         getDatabaseUserInfo,
         disconnect,
+        addMessage,
         auth
     }
 

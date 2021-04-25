@@ -8,4 +8,5 @@ export default styled.div`
     align-items: ${props => props.alignItems || 'unset'};
     justify-content: ${props => props.justifyContent || 'unset'};
     flex-grow: ${props => props.flexGrow || 'unset'};
+    flex-shrink: ${props => props.flexShrink || 'unset'};
 `

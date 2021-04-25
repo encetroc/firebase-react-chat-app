@@ -8,10 +8,6 @@ import { ChatroomOverview } from '../components'
 const Chatrooms = () => {
     const { state, dispatch } = useStore()
 
-    useEffect(() => {
-        //console.log(state.messages['9TFYquy3xzooqxPZsRQi'] && state.messages['9TFYquy3xzooqxPZsRQi'].messages)
-    }, [])
-
     return (
         <CBox>
             <RBox alignItems='center' justifyContent='space-between'>
@@ -31,7 +27,7 @@ const Chatrooms = () => {
             <CDivider />
             <CBox gap='1rem'>
                 {
-                    state.chatrooms && state.chatrooms.map(chatroom => <ChatroomOverview key={chatroom.id} id={chatroom.id} messages={state.messages[chatroom.id].messages} recipients={chatroom.recipients} />)
+                    state.chatrooms && state.chatrooms.map(chatroom => state.messages[chatroom.id] && <ChatroomOverview key={chatroom.id} id={chatroom.id} messages={state.messages[chatroom.id].messages} recipients={chatroom.recipients} />)
                 }
             </CBox>
         </CBox>

@@ -60,7 +60,7 @@ const useStore = () => {
 }
 
 const StoreProvider = ({ children }) => {
-    const { auth, getContacts, getChatrooms, getRealtimeMessages, getDatabaseUserInfo } = useFirebase()
+    const { auth, getContacts, getChatrooms, getRealtimeMessages, getDatabaseUserInfo, addMessage } = useFirebase()
     const [state, dispatch] = useReducer(reducer, initialState);
     const [loading, setLoading] = useState(true)
 
@@ -98,7 +98,7 @@ const StoreProvider = ({ children }) => {
                 })
 
                 chatrooms.forEach(chatroom => {
-                    unsubscribes.push(getRealtimeMessages(chatroom.id, dispatch))
+                    unsubscribes.push(getRealtimeMessages(chatroom.id, dispatch, user))
                 })
 
                 databaseUserInfo && contacts && chatrooms && setLoading(false)
@@ -115,9 +115,11 @@ const StoreProvider = ({ children }) => {
         }
     }, [])
 
-    const asyncDispatch = useCallback(async (actionType) => {
-        switch (actionType) {
-            case 'SET_CURRENT_USER':
+    const asyncDispatch = useCallback(async (action) => {
+        switch (action.type) {
+            case 'ADD_MESSAGE':
+                const { messageContent, userUid, chatroomId } = action.payload
+                await addMessage(messageContent, userUid, chatroomId)
                 break
             default:
                 break
