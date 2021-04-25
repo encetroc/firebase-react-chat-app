@@ -1,25 +1,22 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Switch } from "react-router-dom"
+import { FirebaseProvider } from './Firebase'
+import { StoreProvider } from './Store'
+import { Dashboard } from './components'
+import { PrivateRoute, LoginRoute } from './routes'
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return (
+        <Router>
+            <FirebaseProvider>
+                <StoreProvider>
+                    <Switch>
+                        <PrivateRoute exact path="/" component={Dashboard} />
+                        <LoginRoute path="/login" />
+                    </Switch>
+                </StoreProvider>
+            </FirebaseProvider>
+        </Router>
+    );
 }
 
 export default App;
