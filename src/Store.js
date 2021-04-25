@@ -12,6 +12,9 @@ const initialState = {
 
 const reducer = (state, action) => {
     switch (action.type) {
+        case 'REFRESH':
+            console.log(state)
+            return { ...state }
         case 'RESET_STORE':
             return initialState
         case 'SET_CURRENT_USER':
@@ -77,7 +80,10 @@ const StoreProvider = ({ children }) => {
                 dispatch({
                     type: "ADD_DATABASE_USER_INFO",
                     payload: {
-                        username: databaseUserInfo.username
+                        userInfoFromDatabase: {
+                            username: databaseUserInfo.username,
+                            photoURL: databaseUserInfo.photoURL
+                        }
                     }
                 })
 

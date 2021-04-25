@@ -9,7 +9,7 @@ const LoginRoute = ({ ...rest }) => {
         <Route
             {...rest}
             render={props => {
-                return state.currentUser.userInfoFromAuth ? <Redirect to="/" /> : <Login />
+                return state.currentUser.userInfoFromAuth ? <Redirect to="/chatrooms" /> : <Login />
             }}
         ></Route>
     )

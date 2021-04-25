@@ -11,6 +11,7 @@ const Dashboard = () => {
                 {JSON.stringify(state, undefined, 2)}
             </pre>
             <button onClick={disconnect}>sign out</button>
+            <button onClick={() => console.log(state.messages['9TFYquy3xzooqxPZsRQi'].messages)}>log</button>
         </div>
     )
 }
