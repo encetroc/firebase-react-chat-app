@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react'
 import { initializeApp, getApps } from "firebase/app"
 import { getAuth, signOut, signInWithPopup, GoogleAuthProvider, getAdditionalUserInfo } from "firebase/auth"
-import { setDoc, getDoc, doc, collection, getDocs, getFirestore, query, where, limit, updateDoc, arrayUnion, orderBy, onSnapshot, serverTimestamp } from "firebase/firestore"
+import { setDoc, getDoc, doc, collection, getDocs, getFirestore, query, where, limit, updateDoc, arrayUnion, orderBy, onSnapshot, serverTimestamp, addDoc } from "firebase/firestore"
 
 if (getApps().length === 0) {
     const firebaseApp = initializeApp({
@@ -87,7 +87,6 @@ const FirebaseProvider = ({ children }) => {
                     isOwned: user.uid === doc.data().uid ? true : false,
                     id: doc.id,
                 })
-                //messages.push(doc.data());
             });
             dispatch({
                 type: 'SET_MESSAGES',
@@ -116,6 +115,25 @@ const FirebaseProvider = ({ children }) => {
         return chatrooms
     }
 
+    const getRealtimeChatrooms = (currentUserUid, contacts, dispatch) => {
+        const q = query(collection(firestore, 'chatrooms'), where('usersUid', 'array-contains', currentUserUid))
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const chatrooms = []
+            querySnapshot.forEach((doc) => {
+                const data = doc.data()
+                const id = doc.id
+                const usersUid = data.usersUid.filter(userUid => userUid !== currentUserUid)
+                const recipients = usersUid.map(userUid => contacts.find(contact => contact.uid === userUid))
+                chatrooms.push({ id, recipients })
+            });
+            dispatch({
+                type: 'SET_CHATROOMS',
+                payload: chatrooms
+            })
+        });
+        return unsubscribe
+    }
+
     const addMessage = async (messageContent, userUid, chatroomId) => {
         const messageRef = doc(collection(firestore, 'chatrooms', chatroomId, 'messages'));
         await setDoc(messageRef, {
@@ -126,6 +144,30 @@ const FirebaseProvider = ({ children }) => {
         });
     }
 
+    const addChatroom = async (recipients) => {
+        const chatroomsRef = collection(firestore, 'chatrooms')
+        const chatroomDoc = await addDoc(chatroomsRef, {
+            usersUid: recipients
+        })
+        return chatroomDoc
+    }
+
+    const getChatroom = async (chatroomDoc, contacts, currentUserUid) => {
+        const docRef = doc(firestore, 'chatrooms', chatroomDoc.id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const data = docSnap.data()
+            const id = docSnap.id
+            const usersUid = data.usersUid.filter(userUid => userUid !== currentUserUid)
+            const recipients = usersUid.map(userUid => contacts.find(contact => contact.uid === userUid))
+            return { id, recipients }
+        } else {
+            // doc.data() will be undefined in this case
+            console.log("No such document!");
+        }
+    }
+
     const value = {
         signInWithGoogle,
         getChatrooms,
@@ -134,6 +176,9 @@ const FirebaseProvider = ({ children }) => {
         getDatabaseUserInfo,
         disconnect,
         addMessage,
+        addChatroom,
+        getRealtimeChatrooms,
+        getChatroom,
         auth
     }
 

@@ -26,7 +26,7 @@ const Chatroom = ({ match }) => {
         <CBox>
             <RBox alignItems='center' justifyContent='space-between'>
                 <RBox alignItems='center' gap='1em'>
-                    <BackButton />
+                    <BackButton backHome={true} />
                     <Avatar src={chatroom.recipients[0].photoURL} />
                     <ContactName>{chatroom.recipients[0].displayName}</ContactName>
                 </RBox>

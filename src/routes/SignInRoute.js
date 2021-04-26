@@ -1,18 +1,18 @@
 import { Route, Redirect } from "react-router-dom"
 import { useStore } from '../Store'
-import { Login } from '../components'
+import { SignIn } from '../pages'
 
-const LoginRoute = ({ ...rest }) => {
+const SignInRoute = ({ ...rest }) => {
     const { state } = useStore()
 
     return (
         <Route
             {...rest}
             render={props => {
-                return state.currentUser.userInfoFromAuth ? <Redirect to="/chatrooms" /> : <Login />
+                return state.currentUser.userInfoFromAuth ? <Redirect to="/chatrooms" /> : <SignIn />
             }}
         ></Route>
     )
 }
 
-export default LoginRoute
+export default SignInRoute

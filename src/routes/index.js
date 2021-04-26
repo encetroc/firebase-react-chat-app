@@ -1,7 +1,7 @@
-import LoginRoute from './LoginRoute'
+import SignInRoute from './SignInRoute'
 import PrivateRoute from './PrivateRoute'
 
 export {
-    LoginRoute,
+    SignInRoute,
     PrivateRoute
 }

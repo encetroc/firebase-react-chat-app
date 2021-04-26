@@ -42,6 +42,14 @@ const reducer = (state, action) => {
                 ...state,
                 chatrooms: action.payload || []
             }
+        case 'ADD_CHATROOM':
+            return {
+                ...state,
+                chatrooms: [
+                    ...state.chatrooms,
+                    action.payload
+                ]
+            }
         case 'SET_MESSAGES':
             return {
                 ...state,
@@ -60,7 +68,7 @@ const useStore = () => {
 }
 
 const StoreProvider = ({ children }) => {
-    const { auth, getContacts, getChatrooms, getRealtimeMessages, getDatabaseUserInfo, addMessage } = useFirebase()
+    const { auth, getContacts, getChatrooms, getRealtimeMessages, getDatabaseUserInfo, addMessage, addChatroom, getRealtimeChatrooms, getChatroom } = useFirebase()
     const [state, dispatch] = useReducer(reducer, initialState);
     const [loading, setLoading] = useState(true)
 
@@ -101,6 +109,8 @@ const StoreProvider = ({ children }) => {
                     unsubscribes.push(getRealtimeMessages(chatroom.id, dispatch, user))
                 })
 
+                unsubscribes.push(getRealtimeChatrooms(user.uid, contacts, dispatch))
+
                 databaseUserInfo && contacts && chatrooms && setLoading(false)
             } else {
                 dispatch({
@@ -120,6 +130,18 @@ const StoreProvider = ({ children }) => {
             case 'ADD_MESSAGE':
                 const { messageContent, userUid, chatroomId } = action.payload
                 await addMessage(messageContent, userUid, chatroomId)
+                break
+            case 'ADD_CHATROOM':
+                const { recipients, currentUser, contacts } = action.payload
+                const chatroomDoc = await addChatroom(recipients)
+                const chatroom = await getChatroom(chatroomDoc, contacts, currentUser.uid)
+                console.log(chatroom)
+                //const chatrooms = await getChatrooms(currentUser.uid, contacts)
+                //console.log(chatroom)
+                /* dispatch({
+                    type: "ADD_CHATROOM",
+                    payload: chatroom
+                }) */
                 break
             default:
                 break

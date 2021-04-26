@@ -2,7 +2,7 @@ import { Switch } from "react-router-dom"
 import { FirebaseProvider } from './Firebase'
 import { StoreProvider } from './Store'
 import { Dashboard } from './components'
-import { PrivateRoute, LoginRoute } from './routes'
+import { PrivateRoute, SignInRoute } from './routes'
 import { FullScreen } from './styled-components'
 import { Chatrooms, Chatroom, Contacts } from "./pages"
 
@@ -15,7 +15,7 @@ function App() {
                         <PrivateRoute path="/chatrooms" component={Chatrooms} />
                         <PrivateRoute path="/contacts" component={Contacts} />
                         <PrivateRoute path="/chatroom/:id" component={Chatroom} />
-                        <LoginRoute path="/login" />
+                        <SignInRoute path="/sign-in" />
                         <PrivateRoute exact path="/" component={Dashboard} />
                     </Switch>
                 </FullScreen>
