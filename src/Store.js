@@ -7,7 +7,8 @@ const initialState = {
     currentUser: {},
     contacts: [],
     chatrooms: [],
-    messages: {}
+    messages: {},
+    foundContact: null
 }
 
 const reducer = (state, action) => {
@@ -58,6 +59,11 @@ const reducer = (state, action) => {
                     ...action.payload
                 }
             }
+        case 'SET_FOUND_CONTACT':
+            return {
+                ...state,
+                foundContact: action.payload
+            }
         default:
             return state
     }
@@ -68,7 +74,7 @@ const useStore = () => {
 }
 
 const StoreProvider = ({ children }) => {
-    const { auth, getContacts, getChatrooms, getRealtimeMessages, getDatabaseUserInfo, addMessage, addChatroom, getRealtimeChatrooms, getChatroom } = useFirebase()
+    const { auth, getContacts, getChatrooms, getRealtimeMessages, getDatabaseUserInfo, addMessage, getRealtimeChatrooms, getRealtimeContacts, findContact, addContact, addChatroom } = useFirebase()
     const [state, dispatch] = useReducer(reducer, initialState);
     const [loading, setLoading] = useState(true)
 
@@ -110,6 +116,7 @@ const StoreProvider = ({ children }) => {
                 })
 
                 unsubscribes.push(getRealtimeChatrooms(user.uid, contacts, dispatch))
+                unsubscribes.push(getRealtimeContacts(user.uid, dispatch))
 
                 databaseUserInfo && contacts && chatrooms && setLoading(false)
             } else {
@@ -132,16 +139,22 @@ const StoreProvider = ({ children }) => {
                 await addMessage(messageContent, userUid, chatroomId)
                 break
             case 'ADD_CHATROOM':
-                const { recipients, currentUser, contacts } = action.payload
-                const chatroomDoc = await addChatroom(recipients)
-                const chatroom = await getChatroom(chatroomDoc, contacts, currentUser.uid)
-                console.log(chatroom)
-                //const chatrooms = await getChatrooms(currentUser.uid, contacts)
-                //console.log(chatroom)
-                /* dispatch({
-                    type: "ADD_CHATROOM",
-                    payload: chatroom
-                }) */
+                const { recipients } = action.payload
+                const newChatroomId = await addChatroom(recipients)
+                return newChatroomId
+            case 'FIND_CONTACT':
+                const { inputValue, currentUser, contacts } = action.payload
+                const contact = await findContact(inputValue, currentUser, contacts)
+                if (contact) {
+                    dispatch({
+                        type: 'SET_FOUND_CONTACT',
+                        payload: contact
+                    })
+                }
+                break
+            case 'ADD_NEW_CONTACT':
+                const { currentUserUid, contactUid } = action.payload
+                await addContact(currentUserUid, contactUid)
                 break
             default:
                 break

@@ -67,7 +67,7 @@ const FirebaseProvider = ({ children }) => {
 
     const getContacts = async (contactsRefs) => {
         if (contactsRefs && contactsRefs.length !== 0) {
-            const contacts = await Promise.all(contactsRefs.map(async contactRef => {
+            const contacts = Promise.all(contactsRefs.map(async contactRef => {
                 const contactSnap = await getDoc(contactRef)
                 return contactSnap.data()
             }))
@@ -75,6 +75,23 @@ const FirebaseProvider = ({ children }) => {
         } else {
             return []
         }
+    }
+
+    const getRealtimeContacts = (currentUserUid, dispatch) => {
+        const unsubscribe = onSnapshot(doc(firestore, 'users', currentUserUid), async (doc) => {
+            const user = doc.data()
+            if (user.contacts && user.contacts.length !== 0) {
+                const contacts = await Promise.all(user.contacts.map(async contactRef => {
+                    const contactSnap = await getDoc(contactRef)
+                    return contactSnap.data()
+                }))
+                dispatch({
+                    type: "SET_CONTACTS",
+                    payload: contacts
+                })
+            }
+        });
+        return unsubscribe
     }
 
     const getRealtimeMessages = (docId, dispatch, user) => {
@@ -149,23 +166,37 @@ const FirebaseProvider = ({ children }) => {
         const chatroomDoc = await addDoc(chatroomsRef, {
             usersUid: recipients
         })
-        return chatroomDoc
+        return chatroomDoc.id
     }
 
-    const getChatroom = async (chatroomDoc, contacts, currentUserUid) => {
-        const docRef = doc(firestore, 'chatrooms', chatroomDoc.id);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            const data = docSnap.data()
-            const id = docSnap.id
-            const usersUid = data.usersUid.filter(userUid => userUid !== currentUserUid)
-            const recipients = usersUid.map(userUid => contacts.find(contact => contact.uid === userUid))
-            return { id, recipients }
-        } else {
-            // doc.data() will be undefined in this case
-            console.log("No such document!");
+    const findContact = async (username, currentUser, contacts) => {
+        const q = query(collection(firestore, 'users'), where('username', "==", username), where("uid", "!=", currentUser.uid), limit(1))
+        const querySnapshot = await getDocs(q)
+        const users = []
+        querySnapshot.forEach((doc) => {
+            users.push(doc.data())
+        });
+        const user = users[0]
+        if (!user) {
+            return null
         }
+        const isUserInContacts = contacts.find(contact => contact.uid === user.uid)
+        if (isUserInContacts) {
+            return null
+        } else {
+            return user
+        }
+    }
+
+    const addContact = async (currentUserUid, contactUid) => {
+        const currentUserRef = doc(firestore, "users", currentUserUid)
+        const contactUserRef = doc(firestore, "users", contactUid)
+        await updateDoc(currentUserRef, {
+            contacts: arrayUnion(contactUserRef)
+        });
+        await updateDoc(contactUserRef, {
+            contacts: arrayUnion(currentUserRef)
+        });
     }
 
     const value = {
@@ -178,7 +209,9 @@ const FirebaseProvider = ({ children }) => {
         addMessage,
         addChatroom,
         getRealtimeChatrooms,
-        getChatroom,
+        getRealtimeContacts,
+        findContact,
+        addContact,
         auth
     }
 

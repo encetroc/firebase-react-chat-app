@@ -10,7 +10,7 @@ const Contacts = () => {
         <CBox>
             <RBox alignItems='center' justifyContent='space-between'>
                 <RBox alignItems='center' gap='1em'>
-                    <BackButton />
+                    <BackButton backCustom='/chatrooms' />
                     <CBox gap='0.1em'>
                         <Title>Contacts</Title>
                         <SubTitle>106 contact</SubTitle>
