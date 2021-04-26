@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useFirebase } from '../Firebase'
 import { useStore } from '../Store'
 import { Link } from "react-router-dom";
 import { CBox, RBox, Avatar, Title, CDivider, FloatingButton, CircleButton } from '../styled-components'
@@ -7,6 +7,7 @@ import { ChatroomOverview } from '../components'
 
 const Chatrooms = () => {
     const { state } = useStore()
+    const { disconnect } = useFirebase()
     const chatrooms = state.chatrooms || []
 
     return (
@@ -34,6 +35,7 @@ const Chatrooms = () => {
             <FloatingButton>
                 <Link to="/contacts"><ChatIcon fill='hsl(0, 0%, 100%)' /></Link>
             </FloatingButton>
+            <button onClick={disconnect}>logout</button>
         </CBox>
     )
 }

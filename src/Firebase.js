@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from 'react'
 import { initializeApp, getApps } from "firebase/app"
 import { getAuth, signOut, signInWithPopup, GoogleAuthProvider, getAdditionalUserInfo } from "firebase/auth"
 import { setDoc, getDoc, doc, collection, getDocs, getFirestore, query, where, limit, updateDoc, arrayUnion, orderBy, onSnapshot, serverTimestamp, addDoc } from "firebase/firestore"
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
 
 if (getApps().length === 0) {
     const firebaseApp = initializeApp({
@@ -17,6 +18,8 @@ if (getApps().length === 0) {
 const auth = getAuth()
 const firestore = getFirestore();
 const googleProvider = new GoogleAuthProvider()
+
+const storage = getStorage();
 
 const FirebaseContext = React.createContext()
 
@@ -36,14 +39,24 @@ const FirebaseProvider = ({ children }) => {
                 const user = result.user
 
                 if (additionalUserInfo.isNewUser) {
+                    console.log(user)
                     const randomUsername = `user${getRndInteger(1000, 9999)}#${getRndInteger(1000, 9999)}`
-                    await setDoc(doc(firestore, "users", user.uid), {
+                    const docRef = doc(firestore, "users", user.uid)
+                    await setDoc(docRef, {
                         contacts: [],
                         uid: user.uid,
                         username: randomUsername,
                         email: user.email,
                         displayName: user.displayName,
                         photoURL: user.photoURL
+                    });
+
+                    const photoRef = ref(storage, user.uid)
+                    const blob = await fetch(user.photoURL).then(r => r.blob());
+                    const snapshot = await uploadBytes(photoRef, blob)
+                    const photoURL = await getDownloadURL(snapshot.ref)
+                    await updateDoc(docRef, {
+                        photoURL
                     });
                 }
             }).catch((error) => {
@@ -199,6 +212,23 @@ const FirebaseProvider = ({ children }) => {
         });
     }
 
+    const uploadImg = async () => {
+        const storageRef = ref(storage, 'profile-photos');
+        const blob = await fetch('https://lh3.googleusercontent.com/a-/AOh14Gi11kb5I14YqgA1wIbwjfnwYlMMX96503UEPsD7=s96-c').then(r => r.blob());
+        /* uploadBytes(storageRef, blob).then((snapshot) => {
+            //console.log('Uploaded a blob or file!', snapshot);
+            getDownloadURL(snapshot.ref).then(url => console.log(url))
+        }); */
+        const snapshot = await uploadBytes(storageRef, blob)
+        const photoURL = await getDownloadURL(snapshot.ref)
+        console.log(photoURL)
+    }
+
+    const downloadImg = async () => {
+        getDownloadURL(ref(storage, 'profile-photos'))
+            .then(url => console.log(url))
+    }
+
     const value = {
         signInWithGoogle,
         getChatrooms,
@@ -212,6 +242,8 @@ const FirebaseProvider = ({ children }) => {
         getRealtimeContacts,
         findContact,
         addContact,
+        uploadImg,
+        downloadImg,
         auth
     }
 
