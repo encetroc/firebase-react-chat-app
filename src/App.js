@@ -1,27 +1,26 @@
-import { BrowserRouter as Router, Switch } from "react-router-dom"
+import { Switch } from "react-router-dom"
 import { FirebaseProvider } from './Firebase'
 import { StoreProvider } from './Store'
 import { Dashboard } from './components'
 import { PrivateRoute, LoginRoute } from './routes'
 import { FullScreen } from './styled-components'
-import { Chatrooms, Chatroom } from "./pages"
+import { Chatrooms, Chatroom, Contacts } from "./pages"
 
 function App() {
     return (
-        <Router>
-            <FirebaseProvider>
-                <StoreProvider>
-                    <FullScreen>
-                        <Switch>
-                            <PrivateRoute path="/chatrooms" component={Chatrooms} />
-                            <PrivateRoute path="/chatroom/:id" component={Chatroom} />
-                            <LoginRoute path="/login" />
-                            <PrivateRoute exact path="/" component={Dashboard} />
-                        </Switch>
-                    </FullScreen>
-                </StoreProvider>
-            </FirebaseProvider>
-        </Router>
+        <FirebaseProvider>
+            <StoreProvider>
+                <FullScreen>
+                    <Switch>
+                        <PrivateRoute path="/chatrooms" component={Chatrooms} />
+                        <PrivateRoute path="/contacts" component={Contacts} />
+                        <PrivateRoute path="/chatroom/:id" component={Chatroom} />
+                        <LoginRoute path="/login" />
+                        <PrivateRoute exact path="/" component={Dashboard} />
+                    </Switch>
+                </FullScreen>
+            </StoreProvider>
+        </FirebaseProvider>
     );
 }
 

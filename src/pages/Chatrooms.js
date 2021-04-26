@@ -30,6 +30,9 @@ const Chatrooms = () => {
                     state.chatrooms && state.chatrooms.map(chatroom => state.messages[chatroom.id] && <ChatroomOverview key={chatroom.id} id={chatroom.id} messages={state.messages[chatroom.id].messages} recipients={chatroom.recipients} />)
                 }
             </CBox>
+            <FloatingButton>
+                <Link to="/contacts"><ChatIcon fill='hsl(0, 0%, 100%)' /></Link>
+            </FloatingButton>
         </CBox>
     )
 }
